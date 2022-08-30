@@ -1,0 +1,13 @@
+class,name,sex,age,korean,english,math,science
+1,InKi,male,10,67,87,90,98
+1,Chano,male,12,45,45,56,98
+1,JeeHyun,female,21,95,59,96,88
+1,SunHee,female,26,65,94,89,98
+1,SungHa,male,25,45,65,78,98
+1,HyunJun,male,30,78,76,98,89
+2,Andy,male,55,87,67,65,56
+2,Happy,female,34,89,98,78,78
+2,John,male,48,100,78,56,65
+2,Kate,female,22,99,89,87,87
+2,Minsu,female,27,98,45,56,54
+2,Jay,female,28,65,89,87,78

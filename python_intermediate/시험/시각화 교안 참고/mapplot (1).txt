@@ -1,0 +1,178 @@
+import os
+import matplotlib.pyplot as plt
+## pandas import 하기
+import pandas as pd
+import numpy as np
+from matplotlib import font_manager, rc
+import datetime
+
+font_path = "C:/Windows/Fonts/gulim.ttc"
+file_list = os.listdir('C:/Windows/Fonts')
+font = font_manager.FontProperties(fname=font_path).get_name()
+rc('font', family=font)
+
+colors = ['#d9534f', '#d9534f', '#d9534f']
+colors2 = ['#93c54b', '#93c54b', '#93c54b']
+colors3 = ['#edbe30', '#edbe30', '#edbe30']
+colors4 = ['#4b80c5', '#4b80c5', '#4b80c5']
+
+def makeDF(df,now):
+    # NEW ADD
+    k5Total = df[df['근무지'] == "K5(송도)"]
+    k4Total = df[df['근무지'] == "K4(광주)"]
+    k3Total = df[df['근무지'] == "K3(부평)"]
+
+    k5first = k5Total[k5Total['백신 접종.1'].notnull()]
+    k5first = k5first[k5first['백신 접종.1'] <= now ]
+    k4first = k4Total[k4Total['백신 접종.1'].notnull()]
+    k4first = k4first[k4first['백신 접종.1'] <= now]
+    k3first = k3Total[k3Total['백신 접종.1'].notnull()]
+    k3first = k3first[k3first['백신 접종.1'] <= now]
+
+    fristMissK5 = k5Total[k5Total['백신접종 계획.1'].notnull()]
+    fristMissK5 = fristMissK5[fristMissK5['백신접종 계획.1'] < now]
+    fristMissK5 = fristMissK5[fristMissK5['백신 접종.1'].isnull()]
+    fristMissK4 = k4Total[k4Total['백신접종 계획.1'].notnull()]
+    fristMissK4 = fristMissK4[fristMissK4['백신접종 계획.1'] < now]
+    fristMissK4 = fristMissK4[fristMissK4['백신 접종.1'].isnull()]
+    fristMissK3 = k3Total[k3Total['백신접종 계획.1'].notnull()]
+    fristMissK3 = fristMissK3[fristMissK3['백신접종 계획.1'] < now]
+    fristMissK3 = fristMissK3[fristMissK3['백신 접종.1'].isnull()]
+    fistReservK5= k5Total[k5Total['백신 접종.1'].isnull()& k5Total['백신접종 계획.1'].isnull()]
+    fistReservK4 =k4Total[k4Total['백신 접종.1'].isnull()& k4Total['백신접종 계획.1'].isnull()]
+    fistReservK3 =k3Total[k3Total['백신 접종.1'].isnull()& k3Total['백신접종 계획.1'].isnull()]
+
+    k5sec = k5Total[k5Total['백신 접종.2'].notnull()]
+    k5sec = k5sec[k5sec['백신 접종.2'] <= now]
+    k5sec = len(k5sec) + len(k5first[k5first['백신 접종'] == "얀센"])
+
+    k4sec = k4Total[k4Total['백신 접종.2'].notnull()]
+    k4sec = k4sec[k4sec['백신 접종.2'] <= now]
+    k4sec = len(k4sec) + len(k4first[k4first['백신 접종'] == "얀센"])
+
+    k3sec = k3Total[k3Total['백신 접종.2'].notnull()]
+    k3sec = k3sec[k3sec['백신 접종.2'] <= now]
+    k3sec = len(k3sec) + len(k3first[k3first['백신 접종'] == "얀센"])
+    ###부스트샷
+    k5Third = k5Total[k5Total['백신 접종.3'].notnull()]
+    k5Third = k5Third[k5Third['백신 접종.3'] <= now]
+    k5Third = len(k5Third)
+    k4Third = k4Total[k4Total['백신 접종.3'].notnull()]
+    k4Third = k4Third[k4Third['백신 접종.3'] <= now]
+    k4Third = len(k4Third)
+    k3Third = k3Total[k3Total['백신 접종.3'].notnull()]
+    k3Third = k3Third[k3Third['백신 접종.3'] <= now]
+    k3Third= len(k3Third)
+    ###부스트샷
+
+    k5firstPlan = k5Total[k5Total['백신접종 계획.1'] >= now]
+    k4firstPlan = k4Total[k4Total['백신접종 계획.1'] >= now]
+    k3firstPlan = k3Total[k3Total['백신접종 계획.1'] >= now]
+
+    k5secPlan = k5Total[k5Total['백신접종 계획.2'] >= now]
+    k4secPlan = k4Total[k4Total['백신접종 계획.2'] >= now]
+    k3secPlan = k3Total[k3Total['백신접종 계획.2'] >= now]
+
+    k5ThirdPlan = k5Total[k5Total['백신접종 계획.2'] >= now]
+    k4ThirdPlan = k4Total[k4Total['백신접종 계획.2'] >= now]
+    k3ThirdPlan = k3Total[k3Total['백신접종 계획.2'] >= now]
+
+    k5Total = len(fristMissK5) + len(fistReservK5) + len(k5firstPlan)+ len(k5first)
+    k4Total = len(fristMissK4) + len(fistReservK4) + len(k4firstPlan)+ len(k4first)
+    k3Total = len(fristMissK3) + len(fistReservK3) + len(k3firstPlan)+ len(k3first)
+
+    totalResultGraph = pd.DataFrame({'Plant': ['K5', 'K4', 'K3','TOTAL'],
+                                '대상인원': [k5Total, k4Total, k3Total,k5Total + k4Total + k3Total],
+                                '1차 접종': [len(k5first), len(k4first), len(k3first),len(k5first) + len(k4first) + len(k3first)],
+                                '접종률 1': [round((len(k5first) / k5Total) * 100, 1),
+                                          round((len(k4first) / k4Total) * 100, 1),
+                                          round((len(k3first) / k3Total) * 100, 1),
+                                          round(((len(k5first) + len(k4first) + len(k3first)) / (k5Total + k4Total + k3Total)) * 100, 1)],
+                                 '1차접종 예정': [round(((len(k5firstPlan)+len(k5first)) / k5Total) * 100, 1),
+                                             round(((len(k4firstPlan)+len(k4first)) / k4Total) * 100, 1),
+                                             round(((len(k3firstPlan)+len(k3first)) / k3Total) * 100, 1),
+                                             round((((len(k5firstPlan)+len(k5first)) + (len(k4firstPlan)+len(k4first)) + (len(k3firstPlan)+len(k3first))) / (
+                                                     k5Total + k4Total + k3Total)) * 100, 1)],
+                                '2차 접종': [k5sec, k4sec, k3sec,k5sec + k4sec + k3sec],
+                                '접종률 2': [round((k5sec / k5Total) * 100, 1),
+                                          round((k4sec / k4Total) * 100, 1),
+                                          round((k3sec / k3Total) * 100, 1),
+                                          round(((k5sec+k4sec+k3sec) / (k5Total + k4Total + k3Total)) * 100, 1),
+                                          ],
+                                '2차접종 예정': [round(((len(k5secPlan)+k5sec) / k5Total) * 100, 1),
+                                                 round(((len(k4secPlan)+k4sec) / k4Total) * 100, 1),
+                                                 round(((len(k3secPlan)+k3sec) / k3Total) * 100, 1),
+                                                 round((((len(k5secPlan)+k5sec) + (len(k4secPlan)+k4sec) + (len(k3secPlan)+k3sec)) / (
+                                                         k5Total + k4Total + k3Total)) * 100, 1)],
+                                '3차 접종': [k5Third, k4Third, k3Third,k5Third + k4Third + k3Third],
+                                '접종률 3': [round((k5Third / k5Total) * 100, 1),
+                                          round((k4Third / k4Total) * 100, 1),
+                                          round((k3Third / k3Total) * 100, 1),
+                                          round(((k5Third + k4Third + k3Third) / (k5Total + k4Total + k3Total)) * 100, 1),
+                                          ],
+                                '3차접종 예정': [round(((len(k5ThirdPlan)+k5Third) / k5Total) * 100, 1),
+                                                 round(((len(k4ThirdPlan)+k4Third) / k4Total) * 100, 1),
+                                                 round(((len(k3ThirdPlan)+k3Third) / k3Total) * 100, 1),
+                                                 round((((len(k5ThirdPlan)+k5Third) + (len(k4ThirdPlan)+k4Third) + (len(k3ThirdPlan)+k3Third)) / (
+                                                         k5Total + k4Total + k3Total)) * 100, 1)]
+                                     })
+    return totalResultGraph
+
+def makeGraph(totalResult):
+    x = np.arange(4)
+    # 그래프 밖의 색
+    fig = plt.figure(figsize=(7, 5))
+    fig.patch.set_facecolor('#3b3b3b')
+    years = ['K5', 'K4', 'K3','TOTAL']
+    values = [totalResult['접종률 1'][0], totalResult['접종률 1'][1], totalResult['접종률 1'][2],totalResult['접종률 1'][3]]
+    values2 = [totalResult['접종률 2'][0], totalResult['접종률 2'][1], totalResult['접종률 2'][2],totalResult['접종률 2'][3]]
+    values3 = [totalResult['접종률 3'][0], totalResult['접종률 3'][1], totalResult['접종률 3'][2], totalResult['접종률 3'][3]]
+    plt.grid(zorder=0)
+    plt.bar(x, values, color=colors, width=0.25, label='1차 접종', zorder=3)
+    #cmap='BuGn'
+    #gradientbars(bar,cmap)
+    plt.grid(zorder=0)
+    plt.bar(x + 0.25, values2, color=colors2, width=0.25, label='2차 접종', zorder=3)
+
+    plt.grid(zorder=0)
+    plt.bar(x + 0.5, values3, color=colors3, width=0.25, label='3차 접종', zorder=3)
+    #cmap = 'BuGn'
+    #gradientbars(bar2, cmap)
+    plt.xticks(x, years)
+    plt.ylim([0, 100])
+    plt.title('사업장별 접종현황',color='white', size='22')
+    #plt.legend()
+    legend = plt.legend(facecolor='#3b3b3b', framealpha=1,loc='upper center', ncol=1, fontsize=8, bbox_to_anchor=(1.05, 1.0))
+    plt.setp(legend.get_texts(), color='white')
+    #y축 값 추가
+    wirteGraphTopValue(x, 0,values,values)
+    wirteGraphTopValue(x, 0.25,values2, values2)
+    wirteGraphTopValue(x, 0.5, values3, values3)
+    ax = plt.gca()
+    ax.spines["bottom"].set_color("gray")
+    ax.spines["left"].set_color("gray")
+    ax.spines["right"].set_color("gray")
+    ax.spines["top"].set_color("gray")
+    #그래프 안에 색
+    ax.set_facecolor('#3b3b3b')
+    plt.grid(True, axis='y', color='gray', alpha=0.5, linestyle='--')
+    plt.grid(True, axis='x', color='#3b3b3b', alpha=0.5, linestyle='--')
+    plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
+    ax.tick_params(axis='x', colors='white')
+    ax.tick_params(axis='y', colors='white')
+    plt.show()
+    #plt.savefig(r'C:\FILE\resultGrap.png')
+
+def wirteGraphTopValue(x,val,first,sec):
+    # y축 값 추가
+    for i, v in enumerate(x):
+        plt.text(v+val, first[i],str(first[i])+"%", # 좌표 (x축 = v, y축 = y[0]..y[1], 표시 = y[0]..y[1])
+                 fontsize=8,
+                 color='white',
+                 weight='bold',
+                 horizontalalignment='center',  # horizontalalignment (left, center, right)
+                 verticalalignment='bottom')  # verticalalignment (top, center, bottom)
+df = pd.read_excel("C:\FILE\백신접종현황_20220308.xls")
+now = datetime.datetime.now()
+graphList = makeDF(df,now)
+makeGraph(graphList)
